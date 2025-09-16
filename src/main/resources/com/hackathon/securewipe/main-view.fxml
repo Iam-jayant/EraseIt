@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hackathon.securewipe.MainController">
+   <top>
+      <VBox>
+         <children>
+            <HBox alignment="CENTER" styleClass="header">
+               <children>
+                  <Label styleClass="title" text="Secure Data Wipe Tool">
+                     <font>
+                        <Font name="System Bold" size="24.0" />
+                     </font>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </HBox>
+            <Separator />
+         </children>
+      </VBox>
+   </top>
+   <center>
+      <VBox spacing="15.0">
+         <children>
+            <!-- Drive Selection Section -->
+            <VBox spacing="10.0" styleClass="section">
+               <children>
+                  <Label styleClass="section-title" text="Drive Selection">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label text="Drive:" />
+                        <ComboBox fx:id="driveComboBox" minWidth="400.0" />
+                        <Button fx:id="refreshDrivesButton" onAction="#refreshDrives" text="Refresh" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            
+            <!-- Wipe Method Section -->
+            <VBox spacing="10.0" styleClass="section">
+               <children>
+                  <Label styleClass="section-title" text="Wipe Method">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label text="Method:" />
+                        <ComboBox fx:id="methodComboBox" minWidth="300.0" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            
+            <!-- Action Section -->
+            <VBox spacing="10.0" styleClass="section">
+               <children>
+                  <HBox alignment="CENTER" spacing="20.0">
+                     <children>
+                        <Button fx:id="wipeButton" onAction="#startWipe" styleClass="danger-button" text="Start Secure Wipe">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="saveCertificateButton" onAction="#saveCertificate" text="Save Certificate" />
+                     </children>
+                  </HBox>
+                  <ProgressBar fx:id="progressBar" maxWidth="Infinity" visible="false" />
+               </children>
+            </VBox>
+            
+            <!-- Status Section -->
+            <VBox spacing="10.0" styleClass="section">
+               <children>
+                  <Label styleClass="section-title" text="Status">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="statusLabel" text="Ready" styleClass="status-label" />
+               </children>
+            </VBox>
+            
+            <!-- Log Section -->
+            <VBox spacing="10.0" styleClass="section" VBox.vgrow="ALWAYS">
+               <children>
+                  <Label styleClass="section-title" text="Operation Log">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <TextArea fx:id="logTextArea" editable="false" prefHeight="200.0" VBox.vgrow="ALWAYS" 
+                           promptText="Operation details will appear here..." styleClass="log-area" />
+               </children>
+            </VBox>
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </VBox>
+   </center>
+   <bottom>
+      <VBox>
+         <children>
+            <Separator />
+            <HBox alignment="CENTER_LEFT">
+               <children>
+                  <Label text="Smart India Hackathon 2025 - Secure Data Wipe Tool v1.0.0" styleClass="footer" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Label text="⚠️ WARNING: Data wipe is irreversible!" styleClass="warning" />
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+               </padding>
+            </HBox>
+         </children>
+      </VBox>
+   </bottom>
+</BorderPane>
