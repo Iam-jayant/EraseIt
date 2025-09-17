@@ -1,6 +1,8 @@
-# Secure Data Wipe Tool
+# EraseIt - Secure Data Wipe Tool
 
 ## Smart India Hackathon 2025 - MVP Submission
+
+> **Repository**: This project is hosted on GitHub as "EraseIt" - a professional data erasure solution.
 
 A cross-platform application for securely wiping USB drives and laptop hard drives with digital proof of erasure. This tool provides industry-standard data wiping capabilities with an intuitive one-click interface and generates digitally signed certificates as proof of successful erasure.
 

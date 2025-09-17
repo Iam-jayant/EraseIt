@@ -1,14 +1,11 @@
 # GitHub Repository Setup Script
 # Run this after creating your repository on GitHub.com
 
-Write-Host "=== SecureDataWipeTool GitHub Setup ===" -ForegroundColor Green
+Write-Host "=== EraseIt - Secure Data Wipe Tool GitHub Setup ===" -ForegroundColor Green
 Write-Host ""
 
-# Get repository name from user
-$repoName = Read-Host "Enter your GitHub repository name (default: SecureDataWipeTool)"
-if ([string]::IsNullOrWhiteSpace($repoName)) {
-    $repoName = "SecureDataWipeTool"
-}
+# Repository is already configured
+$repoName = "EraseIt"
 
 $githubUrl = "https://github.com/Iam-jayant/$repoName.git"
 
@@ -23,7 +20,7 @@ git push -u origin main
 
 Write-Host ""
 Write-Host "✓ Repository successfully pushed to GitHub!" -ForegroundColor Green
-Write-Host "✓ View your repository at: https://github.com/Iam-jayant/$repoName" -ForegroundColor Green
+Write-Host "✓ View your repository at: https://github.com/Iam-jayant/EraseIt" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "1. Add repository topics/tags on GitHub: java, javafx, cybersecurity, data-wipe, hackathon"
