@@ -315,15 +315,37 @@ public class SecureWipeEngine {
     }
     
     /**
-     * Validates that a drive can be safely wiped
+     * Validates that a drive can be safely wiped with enhanced safety checks
      */
     public static boolean canWipeDrive(DriveDetector.DriveInfo driveInfo) {
+        logger.info("Safety check for drive: {} ({})", driveInfo.getPath(), driveInfo.getType());
+        
         // Don't allow wiping of system drives
         if (Platform.isWindows()) {
             String systemDrive = System.getenv("SystemDrive");
+            String programFiles = System.getenv("ProgramFiles");
+            String winDir = System.getenv("WINDIR");
+            
+            // Block system drive (usually C:)
             if (driveInfo.getPath().startsWith(systemDrive)) {
+                logger.warn("BLOCKED: Attempted to wipe system drive: {}", driveInfo.getPath());
                 return false;
             }
+            
+            // Additional Windows safety checks
+            if (driveInfo.getPath().startsWith("C:\\") || 
+                driveInfo.getPath().startsWith("c:\\") ||
+                driveInfo.getPath().toLowerCase().contains("windows")) {
+                logger.warn("BLOCKED: Attempted to wipe Windows system drive: {}", driveInfo.getPath());
+                return false;
+            }
+            
+            // Only allow removable drives for extra safety
+            if (driveInfo.getType() != DriveDetector.DriveType.USB_REMOVABLE) {
+                logger.warn("SAFETY: Only removable USB drives are allowed for wiping. Drive type: {}", driveInfo.getType());
+                return false;
+            }
+            
         } else {
             // On Linux, don't allow wiping root filesystem
             try {
@@ -335,13 +357,55 @@ public class SecureWipeEngine {
                     .orElse("");
                 
                 if (driveInfo.getPath().equals(rootDevice)) {
+                    logger.warn("BLOCKED: Attempted to wipe root device: {}", driveInfo.getPath());
+                    return false;
+                }
+                
+                // Block common system partitions
+                if (driveInfo.getPath().contains("/dev/sda") || 
+                    driveInfo.getPath().contains("/dev/nvme0")) {
+                    logger.warn("BLOCKED: Attempted to wipe system storage device: {}", driveInfo.getPath());
                     return false;
                 }
             } catch (Exception e) {
                 logger.warn("Could not determine root device", e);
+                return false; // Fail safe - don't allow if we can't verify
             }
         }
         
+        // Size check - don't allow wiping drives larger than 2TB (likely system drives)
+        if (driveInfo.getSize() > 2L * 1024 * 1024 * 1024 * 1024) {
+            logger.warn("BLOCKED: Drive too large (>2TB), likely system drive: {} GB", 
+                       driveInfo.getSize() / (1024.0 * 1024 * 1024));
+            return false;
+        }
+        
+        logger.info("SAFE: Drive {} passed all safety checks", driveInfo.getPath());
         return true;
+    }
+    
+    /**
+     * Gets a detailed safety assessment of a drive
+     */
+    public static String getSafetyAssessment(DriveDetector.DriveInfo driveInfo) {
+        if (Platform.isWindows()) {
+            String systemDrive = System.getenv("SystemDrive");
+            
+            if (driveInfo.getPath().startsWith(systemDrive)) {
+                return "❌ SYSTEM DRIVE - Cannot wipe (contains Windows OS)";
+            }
+            
+            if (driveInfo.getType() == DriveDetector.DriveType.USB_REMOVABLE) {
+                return "✅ SAFE - Removable USB drive";
+            } else {
+                return "⚠️ CAUTION - Not a removable drive";
+            }
+        } else {
+            if (driveInfo.getPath().contains("/dev/sda") || 
+                driveInfo.getPath().contains("/dev/nvme0")) {
+                return "❌ SYSTEM DRIVE - Cannot wipe (contains OS)";
+            }
+            return "✅ SAFE - External device";
+        }
     }
 }

@@ -31,18 +31,27 @@
             <!-- Drive Selection Section -->
             <VBox spacing="10.0" styleClass="section">
                <children>
-                  <Label styleClass="section-title" text="Drive Selection">
+                  <Label styleClass="section-title" text="🔍 Storage Device Selection">
                      <font>
                         <Font name="System Bold" size="16.0" />
                      </font>
                   </Label>
                   <HBox alignment="CENTER_LEFT" spacing="10.0">
                      <children>
-                        <Label text="Drive:" />
-                        <ComboBox fx:id="driveComboBox" minWidth="400.0" />
-                        <Button fx:id="refreshDrivesButton" onAction="#refreshDrives" text="Refresh" />
+                        <Label text="Device:" />
+                        <ComboBox fx:id="driveComboBox" minWidth="450.0" />
+                        <Button fx:id="refreshDrivesButton" onAction="#refreshDrives" text="🔄 Refresh Devices" />
                      </children>
                   </HBox>
+                  <!-- Safety Information Display -->
+                  <VBox spacing="5.0" style="-fx-background-color: #f0f8ff; -fx-padding: 10; -fx-background-radius: 5;">
+                     <children>
+                        <Label fx:id="safetyLabel" text="Select a device to see safety status" 
+                               style="-fx-font-weight: bold; -fx-text-fill: #333;" wrapText="true" />
+                        <Label fx:id="deviceInfoLabel" text="Device information will appear here" 
+                               style="-fx-text-fill: #666;" wrapText="true" />
+                     </children>
+                  </VBox>
                </children>
             </VBox>
             

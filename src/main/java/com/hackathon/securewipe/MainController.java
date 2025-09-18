@@ -32,6 +32,8 @@ public class MainController implements Initializable {
     @FXML private Label statusLabel;
     @FXML private TextArea logTextArea;
     @FXML private Button saveCertificateButton;
+    @FXML private Label safetyLabel;
+    @FXML private Label deviceInfoLabel;
     
     private CertificateGenerator certificateGenerator;
     private CertificateGenerator.WipeCertificate currentCertificate;
@@ -49,10 +51,16 @@ public class MainController implements Initializable {
             methodComboBox.getItems().addAll(SecureWipeEngine.WipeMethod.values());
             methodComboBox.setValue(SecureWipeEngine.WipeMethod.PLATFORM_DEFAULT);
             
+            // Setup drive selection change listener
+            driveComboBox.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> updateDriveInfo(newValue));
+            
             // Setup initial state
             progressBar.setVisible(false);
             saveCertificateButton.setDisable(true);
-            updateStatus("Ready - Select a drive to wipe");
+            wipeButton.setDisable(true);
+            updateStatus("Ready - Select a USB drive to wipe");
+            updateDriveInfo(null);
             
             // Load available drives
             refreshDrives();
@@ -123,30 +131,44 @@ public class MainController implements Initializable {
             return;
         }
         
-        // Confirmation dialog
+        // Enhanced confirmation dialog with safety information
+        String safetyStatus = SecureWipeEngine.getSafetyAssessment(selectedDrive);
         String confirmationMessage = String.format(
-            "This will permanently erase ALL DATA on the following drive:\\n\\n" +
-            "Drive: %s\\n" +
-            "Size: %.2f GB\\n" +
-            "Method: %s\\n\\n" +
-            "This action CANNOT be undone. Are you absolutely sure you want to continue?",
-            selectedDrive.toString(),
+            "⚠️ FINAL CONFIRMATION - PERMANENT DATA DESTRUCTION ⚠️\n\n" +
+            "Target Device Information:\n" +
+            "• Path: %s\n" +
+            "• Label: %s\n" +
+            "• Size: %.2f GB\n" +
+            "• Type: %s\n" +
+            "• Serial: %s\n" +
+            "• Safety Status: %s\n\n" +
+            "Wipe Method: %s\n\n" +
+            "⚠️ THIS WILL PERMANENTLY ERASE ALL DATA!\n" +
+            "⚠️ THIS ACTION CANNOT BE UNDONE!\n" +
+            "⚠️ ENSURE YOU HAVE BACKUPS OF IMPORTANT DATA!\n\n" +
+            "Type 'WIPE' to confirm (case sensitive):",
+            selectedDrive.getPath(),
+            selectedDrive.getLabel().isEmpty() ? "Unnamed" : selectedDrive.getLabel(),
             selectedDrive.getSize() / (1024.0 * 1024.0 * 1024.0),
+            selectedDrive.getType().toString().replace("_", " "),
+            selectedDrive.getSerialNumber(),
+            safetyStatus,
             selectedMethod.getDisplayName()
         );
         
-        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmDialog.setTitle("Confirm Data Wipe");
-        confirmDialog.setHeaderText("WARNING: This will permanently destroy all data!");
+        // Custom confirmation dialog requiring typing "WIPE"
+        TextInputDialog confirmDialog = new TextInputDialog();
+        confirmDialog.setTitle("⚠️ CONFIRM DATA WIPE");
+        confirmDialog.setHeaderText("FINAL SAFETY CONFIRMATION");
         confirmDialog.setContentText(confirmationMessage);
+        confirmDialog.getEditor().setPromptText("Type 'WIPE' here");
         
-        ButtonType yesButton = new ButtonType("Yes, Wipe Drive", ButtonBar.ButtonData.YES);
-        ButtonType noButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        confirmDialog.getButtonTypes().setAll(yesButton, noButton);
-        
-        Optional<ButtonType> result = confirmDialog.showAndWait();
-        if (result.isPresent() && result.get() == yesButton) {
+        Optional<String> result = confirmDialog.showAndWait();
+        if (result.isPresent() && "WIPE".equals(result.get())) {
             performWipe(selectedDrive, selectedMethod);
+        } else if (result.isPresent()) {
+            showWarningDialog("Confirmation Failed", 
+                "You must type 'WIPE' exactly to confirm. Operation cancelled for safety.");
         }
     }
     
@@ -305,6 +327,47 @@ public class MainController implements Initializable {
     private void updateStatus(String status) {
         statusLabel.setText(status);
         logger.debug("Status: {}", status);
+    }
+    
+    /**
+     * Updates the drive information display with safety assessment
+     */
+    private void updateDriveInfo(DriveDetector.DriveInfo driveInfo) {
+        if (driveInfo == null) {
+            safetyLabel.setText("📝 Select a storage device to see safety status");
+            safetyLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #666;");
+            deviceInfoLabel.setText("Device information will appear here");
+            wipeButton.setDisable(true);
+            return;
+        }
+        
+        // Get safety assessment
+        String safetyAssessment = SecureWipeEngine.getSafetyAssessment(driveInfo);
+        boolean canWipe = SecureWipeEngine.canWipeDrive(driveInfo);
+        
+        // Update safety label with color coding
+        safetyLabel.setText(safetyAssessment);
+        if (canWipe) {
+            safetyLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2e7d32;"); // Green
+            wipeButton.setDisable(false);
+        } else {
+            safetyLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #d32f2f;"); // Red  
+            wipeButton.setDisable(true);
+        }
+        
+        // Update device info
+        String deviceInfo = String.format(
+            "💾 %s | 📊 %.2f GB | 🏷️ %s | 🇮🇩 %s",
+            driveInfo.getLabel().isEmpty() ? "Unnamed Device" : driveInfo.getLabel(),
+            driveInfo.getSize() / (1024.0 * 1024.0 * 1024.0),
+            driveInfo.getType().toString().replace("_", " "),
+            driveInfo.getSerialNumber()
+        );
+        deviceInfoLabel.setText(deviceInfo);
+        
+        // Log selection for safety audit
+        logger.info("Device selected: {} | Safety: {} | Can wipe: {}", 
+                   driveInfo.getPath(), safetyAssessment, canWipe);
     }
     
     private void showErrorDialog(String title, String message) {
