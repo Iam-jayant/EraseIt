@@ -3,6 +3,7 @@ package com.hackathon.securewipe;
 import com.sun.jna.Platform;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinBase;
+import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.ptr.IntByReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +93,7 @@ public class DriveDetector {
         
         try {
             char[] buffer = new char[256];
-            Kernel32.INSTANCE.GetLogicalDriveStrings(buffer.length, buffer);
+            Kernel32.INSTANCE.GetLogicalDriveStrings(new WinDef.DWORD(buffer.length), buffer);
             
             String driveStrings = new String(buffer);
             String[] driveLetters = driveStrings.split("\0");
@@ -104,10 +105,10 @@ public class DriveDetector {
                 DriveType type = mapWindowsDriveType(driveType);
                 
                 // Get drive info
-                IntByReference sectorsPerCluster = new IntByReference();
-                IntByReference bytesPerSector = new IntByReference();
-                IntByReference freeClusters = new IntByReference();
-                IntByReference totalClusters = new IntByReference();
+                WinDef.DWORDByReference sectorsPerCluster = new WinDef.DWORDByReference();
+                WinDef.DWORDByReference bytesPerSector = new WinDef.DWORDByReference();
+                WinDef.DWORDByReference freeClusters = new WinDef.DWORDByReference();
+                WinDef.DWORDByReference totalClusters = new WinDef.DWORDByReference();
                 
                 boolean success = Kernel32.INSTANCE.GetDiskFreeSpace(
                     driveLetter, sectorsPerCluster, bytesPerSector, freeClusters, totalClusters
@@ -115,9 +116,9 @@ public class DriveDetector {
                 
                 long size = 0;
                 if (success) {
-                    size = (long) totalClusters.getValue() * 
-                           sectorsPerCluster.getValue() * 
-                           bytesPerSector.getValue();
+                    size = (long) totalClusters.getValue().intValue() * 
+                           sectorsPerCluster.getValue().intValue() * 
+                           bytesPerSector.getValue().intValue();
                 }
                 
                 // Get volume information

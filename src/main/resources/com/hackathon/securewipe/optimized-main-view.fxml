@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hackathon.securewipe.OptimizedMainController">
+   <top>
+      <VBox>
+         <children>
+            <HBox alignment="CENTER" styleClass="header">
+               <children>
+                  <Label styleClass="title" text="⚡ Optimized Secure Data Wipe Tool">
+                     <font>
+                        <Font name="System Bold" size="24.0" />
+                     </font>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </HBox>
+            <Separator />
+         </children>
+      </VBox>
+   </top>
+   <center>
+      <VBox spacing="15.0">
+         <children>
+            <!-- Drive Selection Section -->
+            <VBox spacing="10.0" styleClass="section">
+               <children>
+                  <Label styleClass="section-title" text="🔍 Storage Device Selection (Enhanced Detection)">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label text="Device:" />
+                        <ComboBox fx:id="driveComboBox" minWidth="450.0" />
+                        <Button fx:id="refreshDrivesButton" onAction="#refreshDrives" text="🔄 Refresh Devices" />
+                     </children>
+                  </HBox>
+                  <!-- Enhanced Safety Information Display -->
+                  <VBox spacing="5.0" style="-fx-background-color: #f0f8ff; -fx-padding: 10; -fx-background-radius: 5;">
+                     <children>
+                        <Label fx:id="safetyLabel" text="Select a device to see safety status and performance profile" 
+                               style="-fx-font-weight: bold; -fx-text-fill: #333;" wrapText="true" />
+                        <Label fx:id="deviceInfoLabel" text="Device information and optimization profile will appear here" 
+                               style="-fx-text-fill: #666;" wrapText="true" />
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+            
+            <!-- Optimized Wipe Method Section -->
+            <VBox spacing="10.0" styleClass="section">
+               <children>
+                  <Label styleClass="section-title" text="⚡ Optimized Wipe Method">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label text="Method:" />
+                        <ComboBox fx:id="methodComboBox" minWidth="350.0" />
+                     </children>
+                  </HBox>
+                  <!-- Method Information -->
+                  <Label text="⚡ All methods include multi-threading, hardware acceleration (when available), and optimized I/O" 
+                         style="-fx-text-fill: #666; -fx-font-style: italic;" wrapText="true" />
+               </children>
+            </VBox>
+            
+            <!-- Performance Monitoring Section -->
+            <VBox spacing="10.0" styleClass="section">
+               <children>
+                  <Label styleClass="section-title" text="📊 Real-Time Performance Monitoring">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <HBox alignment="CENTER_LEFT" spacing="20.0">
+                     <children>
+                        <Label fx:id="performanceLabel" text="Performance: Ready" styleClass="performance-label">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="speedLabel" text="Speed: -- MB/s" styleClass="speed-label">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="etaLabel" text="ETA: --:--:--" styleClass="eta-label">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <ProgressIndicator fx:id="performanceIndicator" prefHeight="25.0" prefWidth="25.0" visible="false" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            
+            <!-- Action Section -->
+            <VBox spacing="10.0" styleClass="section">
+               <children>
+                  <HBox alignment="CENTER" spacing="20.0">
+                     <children>
+                        <Button fx:id="wipeButton" onAction="#startOptimizedWipe" styleClass="optimize-button" text="🚀 Start Optimized Secure Wipe">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="saveCertificateButton" onAction="#saveCertificate" text="💾 Save Enhanced Certificate" />
+                     </children>
+                  </HBox>
+                  <ProgressBar fx:id="progressBar" maxWidth="Infinity" visible="false" prefHeight="20.0" />
+                  <!-- Progress Details -->
+                  <HBox alignment="CENTER" spacing="15.0" visible="false" fx:id="progressDetailsBox">
+                     <children>
+                        <Label text="⚡" style="-fx-text-fill: #ff6b00;" />
+                        <Label text="Multi-threaded processing active" style="-fx-font-weight: bold; -fx-text-fill: #ff6b00;" />
+                        <Label text="🚀" style="-fx-text-fill: #2196f3;" />
+                        <Label text="Hardware acceleration enabled" style="-fx-font-weight: bold; -fx-text-fill: #2196f3;" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            
+            <!-- Enhanced Status Section -->
+            <VBox spacing="10.0" styleClass="section">
+               <children>
+                  <Label styleClass="section-title" text="📈 System Status">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="statusLabel" text="Ready" styleClass="status-label" />
+               </children>
+            </VBox>
+            
+            <!-- Enhanced Log Section -->
+            <VBox spacing="10.0" styleClass="section" VBox.vgrow="ALWAYS">
+               <children>
+                  <Label styleClass="section-title" text="🔍 Operation Log (Real-Time)">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <TextArea fx:id="logTextArea" editable="false" prefHeight="200.0" VBox.vgrow="ALWAYS" 
+                           promptText="Optimized operation details will appear here with real-time performance metrics..." 
+                           styleClass="log-area" />
+               </children>
+            </VBox>
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </VBox>
+   </center>
+   <bottom>
+      <VBox>
+         <children>
+            <Separator />
+            <HBox alignment="CENTER_LEFT">
+               <children>
+                  <Label text="Smart India Hackathon 2025 - Optimized Secure Data Wipe Tool v2.0.0" styleClass="footer" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Label text="⚡ OPTIMIZED FOR SPEED | 🛡️ NIST SP 800-88 COMPLIANT" styleClass="optimization-badge" />
+                  <Region prefWidth="20.0" />
+                  <Label text="⚠️ WARNING: Data wipe is irreversible!" styleClass="warning" />
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+               </padding>
+            </HBox>
+         </children>
+      </VBox>
+   </bottom>
+</BorderPane>

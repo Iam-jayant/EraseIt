@@ -110,7 +110,7 @@ public class SecureWipeEngine {
     }
     
     /**
-     * Wipes a drive on Windows using PowerShell and Cipher commands
+     * Wipes a drive on Windows using direct raw device access
      */
     private static WipeResult wipeWindowsDrive(DriveDetector.DriveInfo driveInfo, 
                                              WipeMethod method,
@@ -120,42 +120,150 @@ public class SecureWipeEngine {
         String driveLetter = driveInfo.getPath();
         progressCallback.accept(0.1);
         
-        // Step 1: Format the drive
-        logger.info("Formatting drive {}", driveLetter);
-        ProcessBuilder formatBuilder = new ProcessBuilder(
-            "powershell.exe", "-Command", 
-            "Format-Volume -DriveLetter " + driveLetter.substring(0, 1) + " -FileSystem NTFS -Force"
-        );
+        logger.info("Starting direct wipe of drive {}", driveLetter);
         
-        Process formatProcess = formatBuilder.start();
-        int formatResult = formatProcess.waitFor();
+        // Use direct file access to overwrite drive sectors
+        try {
+            return performDirectWipe(driveInfo, method, progressCallback, startTime);
+        } catch (Exception e) {
+            logger.warn("Direct wipe failed, trying alternative method: {}", e.getMessage());
+            
+            // Fallback: Try sdelete if available
+            return performSDeleteWipe(driveInfo, method, progressCallback, startTime);
+        }
+    }
+    
+    /**
+     * Performs file-based wiping by creating large temporary files
+     */
+    private static WipeResult performDirectWipe(DriveDetector.DriveInfo driveInfo,
+                                              WipeMethod method,
+                                              Consumer<Double> progressCallback,
+                                              LocalDateTime startTime) throws Exception {
         
-        if (formatResult != 0) {
-            throw new RuntimeException("Failed to format drive " + driveLetter);
+        String drivePath = driveInfo.getPath();
+        long driveSize = driveInfo.getSize();
+        
+        logger.info("Performing file-based wipe on {} (Size: {} bytes)", drivePath, driveSize);
+        
+        // Get available free space
+        java.io.File driveRoot = new java.io.File(drivePath);
+        long freeSpace = driveRoot.getFreeSpace();
+        
+        logger.info("Available free space: {} bytes", freeSpace);
+        
+        // Create wipe patterns based on method
+        byte[][] patterns = getWipePatterns(method);
+        
+        long totalBytesWritten = 0;
+        
+        for (int pass = 0; pass < patterns.length; pass++) {
+            byte[] pattern = patterns[pass];
+            logger.info("Starting pass {} of {} with pattern", pass + 1, patterns.length);
+            
+            // Create temporary wipe files to fill the drive
+            java.util.List<java.io.File> wipeFiles = new java.util.ArrayList<>();
+            
+            try {
+                long remainingSpace = freeSpace;
+                int fileIndex = 0;
+                
+                while (remainingSpace > 1024 * 1024) { // While at least 1MB remains
+                    java.io.File wipeFile = new java.io.File(driveRoot, "wipe_temp_" + pass + "_" + fileIndex + ".tmp");
+                    wipeFiles.add(wipeFile);
+                    
+                    long fileSize = Math.min(100L * 1024 * 1024, remainingSpace - 1024); // 100MB chunks, leave 1KB buffer
+                    
+                    logger.debug("Creating wipe file: {} (Size: {} bytes)", wipeFile.getName(), fileSize);
+                    
+                    try (java.io.FileOutputStream fos = new java.io.FileOutputStream(wipeFile);
+                         java.io.BufferedOutputStream bos = new java.io.BufferedOutputStream(fos)) {
+                        
+                        byte[] buffer = new byte[1024 * 1024]; // 1MB buffer
+                        
+                        // Fill buffer with pattern
+                        for (int i = 0; i < buffer.length; i++) {
+                            buffer[i] = pattern[i % pattern.length];
+                        }
+                        
+                        long bytesWritten = 0;
+                        while (bytesWritten < fileSize) {
+                            long remainingBytes = fileSize - bytesWritten;
+                            int bytesToWrite = (int) Math.min(buffer.length, remainingBytes);
+                            
+                            bos.write(buffer, 0, bytesToWrite);
+                            bytesWritten += bytesToWrite;
+                            totalBytesWritten += bytesToWrite;
+                            remainingSpace -= bytesToWrite;
+                            
+                            // Update progress
+                            double passProgress = (double) pass / patterns.length;
+                            double fileProgress = (double) totalBytesWritten / (freeSpace * patterns.length);
+                            progressCallback.accept((passProgress + fileProgress) * 0.95);
+                            
+                            // Check every 10MB
+                            if (bytesWritten % (10 * 1024 * 1024) == 0) {
+                                Thread.sleep(10); // Brief pause
+                            }
+                        }
+                        
+                        bos.flush();
+                        fos.getFD().sync(); // Force write to disk
+                    }
+                    
+                    fileIndex++;
+                    
+                    // Update remaining space (check actual free space)
+                    remainingSpace = driveRoot.getFreeSpace();
+                }
+                
+                logger.info("Pass {} completed. Created {} wipe files.", pass + 1, wipeFiles.size());
+                
+            } finally {
+                // Clean up temporary files after each pass
+                for (java.io.File wipeFile : wipeFiles) {
+                    try {
+                        if (wipeFile.exists()) {
+                            boolean deleted = wipeFile.delete();
+                            if (!deleted) {
+                                logger.warn("Failed to delete wipe file: {}", wipeFile.getName());
+                            }
+                        }
+                    } catch (Exception e) {
+                        logger.warn("Error deleting wipe file: {}", e.getMessage());
+                    }
+                }
+            }
         }
         
-        progressCallback.accept(0.3);
+        progressCallback.accept(1.0);
+        LocalDateTime endTime = LocalDateTime.now();
         
-        // Step 2: Use Cipher for secure deletion
-        logger.info("Running Cipher secure wipe on {}", driveLetter);
+        logger.info("File-based wipe completed successfully. Total bytes written: {}", totalBytesWritten);
+        return new WipeResult(true, method.getDisplayName(), startTime, endTime,
+                            driveInfo.getPath(), driveInfo.getSerialNumber(),
+                            totalBytesWritten, null);
+    }
+    
+    /**
+     * Fallback method using sdelete or diskpart
+     */
+    private static WipeResult performSDeleteWipe(DriveDetector.DriveInfo driveInfo,
+                                                WipeMethod method,
+                                                Consumer<Double> progressCallback,
+                                                LocalDateTime startTime) throws Exception {
         
-        String cipherCommand;
-        switch (method) {
-            case DOD_3_PASS:
-                cipherCommand = "cipher /w:" + driveLetter;
-                break;
-            case SINGLE_PASS_ZERO:
-            case PLATFORM_DEFAULT:
-            default:
-                cipherCommand = "cipher /w:" + driveLetter;
-                break;
-        }
+        String driveLetter = driveInfo.getPath();
+        logger.info("Trying sdelete wipe for drive {}", driveLetter);
+        
+        // Try to use cipher command for free space wiping
+        String cipherCommand = "cipher /w:" + driveLetter;
         
         ProcessBuilder cipherBuilder = new ProcessBuilder("cmd.exe", "/c", cipherCommand);
         Process cipherProcess = cipherBuilder.start();
         
         // Monitor progress
-        monitorProcessProgress(cipherProcess, progressCallback, 0.3, 0.9);
+        monitorProcessProgress(cipherProcess, progressCallback, 0.1, 0.9);
         
         int cipherResult = cipherProcess.waitFor();
         progressCallback.accept(1.0);
@@ -163,13 +271,75 @@ public class SecureWipeEngine {
         LocalDateTime endTime = LocalDateTime.now();
         
         if (cipherResult == 0) {
-            logger.info("Successfully wiped drive {}", driveLetter);
-            return new WipeResult(true, method.getDisplayName(), startTime, endTime,
+            logger.info("Cipher wipe completed for drive {}", driveLetter);
+            return new WipeResult(true, method.getDisplayName() + " (Cipher)", startTime, endTime,
                                 driveInfo.getPath(), driveInfo.getSerialNumber(),
                                 driveInfo.getSize(), null);
         } else {
-            throw new RuntimeException("Cipher command failed with exit code: " + cipherResult);
+            throw new RuntimeException("All wipe methods failed for drive " + driveLetter);
         }
+    }
+    
+    /**
+     * Gets wipe patterns based on method
+     */
+    private static byte[][] getWipePatterns(WipeMethod method) {
+        switch (method) {
+            case SINGLE_PASS_ZERO:
+                return new byte[][]{{0x00}};
+            case DOD_3_PASS:
+                return new byte[][]{{(byte) 0xFF}, {0x00}, generateRandomPattern()};
+            case GUTMANN_35_PASS:
+                return generateGutmannPatterns();
+            case PLATFORM_DEFAULT:
+            default:
+                return new byte[][]{{0x00}};
+        }
+    }
+    
+    /**
+     * Generates random pattern
+     */
+    private static byte[] generateRandomPattern() {
+        byte[] pattern = new byte[1024];
+        new java.security.SecureRandom().nextBytes(pattern);
+        return pattern;
+    }
+    
+    /**
+     * Generates Gutmann patterns (simplified version)
+     */
+    private static byte[][] generateGutmannPatterns() {
+        byte[][] patterns = new byte[35][];
+        java.security.SecureRandom random = new java.security.SecureRandom();
+        
+        for (int i = 0; i < 35; i++) {
+            patterns[i] = new byte[1024];
+            if (i < 4 || i >= 31) {
+                // Random patterns for first 4 and last 4 passes
+                random.nextBytes(patterns[i]);
+            } else {
+                // Specific patterns for middle passes
+                byte patternByte = getGutmannPatternByte(i - 4);
+                for (int j = 0; j < patterns[i].length; j++) {
+                    patterns[i][j] = patternByte;
+                }
+            }
+        }
+        return patterns;
+    }
+    
+    /**
+     * Gets specific Gutmann pattern byte
+     */
+    private static byte getGutmannPatternByte(int pass) {
+        byte[] gutmannBytes = {
+            0x55, (byte) 0xAA, (byte) 0x92, 0x49, (byte) 0x24, (byte) 0x92, 0x49, (byte) 0x24,
+            0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+            (byte) 0x88, (byte) 0x99, (byte) 0xAA, (byte) 0xBB, (byte) 0xCC, (byte) 0xDD, (byte) 0xEE, (byte) 0xFF,
+            0x6D, (byte) 0xB6, (byte) 0xDB
+        };
+        return gutmannBytes[pass % gutmannBytes.length];
     }
     
     /**

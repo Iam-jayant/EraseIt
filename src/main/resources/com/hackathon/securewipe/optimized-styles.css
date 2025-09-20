@@ -1,0 +1,309 @@
+/* ⚡ Optimized Secure Data Wipe Tool - Enhanced Styles */
+/* Performance-focused UI with professional appearance */
+
+.root {
+    -fx-base: #f4f4f4;
+    -fx-background: linear-gradient(to bottom, #fafafa, #f0f0f0);
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Header Styles */
+.header {
+    -fx-background-color: linear-gradient(to bottom, #2196f3, #1976d2);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 2);
+}
+
+.title {
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.3), 2, 0, 0, 1);
+}
+
+/* Section Styles */
+.section {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+}
+
+.section-title {
+    -fx-text-fill: #333;
+    -fx-font-weight: bold;
+}
+
+/* Enhanced Button Styles */
+.optimize-button {
+    -fx-background-color: linear-gradient(to bottom, #ff6b00, #e65100);
+    -fx-text-fill: white;
+    -fx-background-radius: 6;
+    -fx-padding: 10 20;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.3), 3, 0, 0, 1);
+    -fx-cursor: hand;
+}
+
+.optimize-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #ff8a00, #ef6c00);
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.4), 4, 0, 0, 2);
+}
+
+.optimize-button:pressed {
+    -fx-background-color: linear-gradient(to bottom, #e65100, #d84315);
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 2, 0, 0, 1);
+}
+
+/* Performance Monitoring Styles */
+.performance-label {
+    -fx-text-fill: #2196f3;
+    -fx-background-color: rgba(33, 150, 243, 0.1);
+    -fx-background-radius: 4;
+    -fx-padding: 5 10;
+}
+
+.speed-label {
+    -fx-text-fill: #4caf50;
+    -fx-background-color: rgba(76, 175, 80, 0.1);
+    -fx-background-radius: 4;
+    -fx-padding: 5 10;
+}
+
+.eta-label {
+    -fx-text-fill: #ff9800;
+    -fx-background-color: rgba(255, 152, 0, 0.1);
+    -fx-background-radius: 4;
+    -fx-padding: 5 10;
+}
+
+/* Enhanced Progress Bar */
+.progress-bar {
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 10;
+    -fx-padding: 2;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: linear-gradient(to right, #4caf50, #8bc34a);
+    -fx-background-radius: 8;
+    -fx-background-insets: 0;
+}
+
+.progress-bar > .track {
+    -fx-background-color: #f5f5f5;
+    -fx-background-radius: 8;
+    -fx-background-insets: 0;
+}
+
+/* Enhanced Progress Indicator */
+.progress-indicator {
+    -fx-progress-color: #ff6b00;
+}
+
+.progress-indicator > .spinner {
+    -fx-background-color: transparent;
+}
+
+.progress-indicator > .determinate-indicator > .indicator {
+    -fx-background-color: #ff6b00;
+    -fx-background-insets: 0;
+    -fx-background-radius: 180;
+    -fx-padding: 0;
+}
+
+/* Status and Log Styles */
+.status-label {
+    -fx-text-fill: #333;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.log-area {
+    -fx-background-color: #263238;
+    -fx-text-fill: #b0bec5;
+    -fx-font-family: "Consolas", "Monaco", "Courier New", monospace;
+    -fx-font-size: 12px;
+    -fx-background-radius: 4;
+    -fx-border-color: #455a64;
+    -fx-border-radius: 4;
+    -fx-border-width: 1;
+}
+
+.log-area > .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.log-area > .scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.log-area > .scroll-pane > .content {
+    -fx-background-color: transparent;
+}
+
+/* Enhanced ComboBox Styles */
+.combo-box {
+    -fx-background-color: white;
+    -fx-background-radius: 4;
+    -fx-border-color: #c0c0c0;
+    -fx-border-radius: 4;
+    -fx-border-width: 1;
+}
+
+.combo-box:focused {
+    -fx-border-color: #2196f3;
+    -fx-border-width: 2;
+}
+
+.combo-box > .list-cell {
+    -fx-text-fill: #333;
+    -fx-padding: 8 12;
+}
+
+.combo-box-popup > .list-view {
+    -fx-background-color: white;
+    -fx-border-color: #2196f3;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 2);
+}
+
+.combo-box-popup > .list-view > .list-cell {
+    -fx-text-fill: #333;
+    -fx-padding: 8 12;
+}
+
+.combo-box-popup > .list-view > .list-cell:hover {
+    -fx-background-color: #e3f2fd;
+}
+
+.combo-box-popup > .list-view > .list-cell:selected {
+    -fx-background-color: #2196f3;
+    -fx-text-fill: white;
+}
+
+/* Enhanced Button Styles */
+.button {
+    -fx-background-color: linear-gradient(to bottom, #f5f5f5, #e0e0e0);
+    -fx-text-fill: #333;
+    -fx-background-radius: 4;
+    -fx-border-color: #c0c0c0;
+    -fx-border-radius: 4;
+    -fx-border-width: 1;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: linear-gradient(to bottom, #fafafa, #e8e8e8);
+    -fx-border-color: #999;
+}
+
+.button:pressed {
+    -fx-background-color: linear-gradient(to bottom, #e0e0e0, #d0d0d0);
+}
+
+.button:disabled {
+    -fx-opacity: 0.6;
+    -fx-cursor: default;
+}
+
+/* Footer Styles */
+.footer {
+    -fx-text-fill: #666;
+    -fx-font-size: 11px;
+}
+
+.optimization-badge {
+    -fx-text-fill: #2196f3;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-background-color: rgba(33, 150, 243, 0.1);
+    -fx-background-radius: 12;
+    -fx-padding: 4 8;
+}
+
+.warning {
+    -fx-text-fill: #d32f2f;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+}
+
+/* Separator Styles */
+.separator > .line {
+    -fx-background-color: #e0e0e0;
+    -fx-border-color: transparent;
+}
+
+/* Enhanced Safety Indicators */
+.safety-safe {
+    -fx-text-fill: #2e7d32;
+    -fx-background-color: rgba(76, 175, 80, 0.1);
+    -fx-background-radius: 4;
+    -fx-padding: 4 8;
+}
+
+.safety-warning {
+    -fx-text-fill: #f57c00;
+    -fx-background-color: rgba(255, 152, 0, 0.1);
+    -fx-background-radius: 4;
+    -fx-padding: 4 8;
+}
+
+.safety-danger {
+    -fx-text-fill: #d32f2f;
+    -fx-background-color: rgba(244, 67, 54, 0.1);
+    -fx-background-radius: 4;
+    -fx-padding: 4 8;
+}
+
+/* Tooltip Styles */
+.tooltip {
+    -fx-background-color: rgba(0, 0, 0, 0.9);
+    -fx-text-fill: white;
+    -fx-background-radius: 4;
+    -fx-font-size: 11px;
+    -fx-padding: 8 12;
+}
+
+/* Scroll Bar Styles */
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.scroll-bar:vertical > .track {
+    -fx-background-color: #f0f0f0;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar:vertical > .thumb {
+    -fx-background-color: #c0c0c0;
+    -fx-background-insets: 2;
+    -fx-background-radius: 2;
+}
+
+.scroll-bar:vertical > .thumb:hover {
+    -fx-background-color: #999;
+}
+
+/* Animation and Transitions */
+.button, .combo-box, .progress-bar {
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+/* High DPI Support */
+@media (-fx-display-density: high) {
+    .root {
+        -fx-font-size: 14px;
+    }
+    
+    .title {
+        -fx-font-size: 26px;
+    }
+    
+    .section-title {
+        -fx-font-size: 17px;
+    }
+}

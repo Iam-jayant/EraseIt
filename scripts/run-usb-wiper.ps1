@@ -7,7 +7,7 @@ Write-Host "======================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "🔒 SAFETY FEATURES ENABLED:" -ForegroundColor Yellow
 Write-Host "✅ Only USB removable drives can be wiped" -ForegroundColor Green
-Write-Host "✅ System drives (C:\) are completely blocked" -ForegroundColor Green
+Write-Host "✅ System drives (C:\\) are completely blocked" -ForegroundColor Green
 Write-Host "✅ Multiple confirmation dialogs required" -ForegroundColor Green
 Write-Host "✅ Must type 'WIPE' to confirm operation" -ForegroundColor Green
 Write-Host "✅ Drive larger than 2TB are blocked" -ForegroundColor Green
@@ -101,4 +101,4 @@ if ($confirmation -eq "START") {
 }
 
 Write-Host ""
-Write-Host "Thank you for using EraseIt responsibly! 🎯" -ForegroundColor Green
+Write-Host "Thank you for using EraseIt responsibly!" -ForegroundColor Green
