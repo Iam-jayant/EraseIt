@@ -65,7 +65,7 @@ public class OptimizedMainController implements Initializable {
             
             // Setup combo boxes with optimized methods
             methodComboBox.getItems().addAll(OptimizedSecureWipeEngine.OptimizedWipeMethod.values());
-            methodComboBox.setValue(OptimizedSecureWipeEngine.OptimizedWipeMethod.NIST_DOD_3_PASS);
+            methodComboBox.setValue(OptimizedSecureWipeEngine.OptimizedWipeMethod.ULTRA_FAST_FORMAT); // Set fastest as default
             
             // Setup drive selection change listener
             driveComboBox.getSelectionModel().selectedItemProperty().addListener(
@@ -562,24 +562,40 @@ public class OptimizedMainController implements Initializable {
      */
     private String getEstimatedWipeTime(DriveDetector.DriveInfo driveInfo, 
                                        OptimizedSecureWipeEngine.OptimizedWipeMethod method) {
-        if (method == null) method = OptimizedSecureWipeEngine.OptimizedWipeMethod.NIST_DOD_3_PASS;
+        if (method == null) method = OptimizedSecureWipeEngine.OptimizedWipeMethod.ULTRA_FAST_FORMAT;
         
         double sizeGB = driveInfo.getSize() / (1024.0 * 1024.0 * 1024.0);
         double estimatedSpeedMBps;
         
-        // Estimate speed based on drive type (optimized values)
-        switch (driveInfo.getType()) {
-            case USB_REMOVABLE:
-                estimatedSpeedMBps = 45.0; // Optimized USB speed
-                break;
-            case SSD:
-                estimatedSpeedMBps = 120.0; // High-performance SSD
-                break;
-            case HARD_DISK:
-                estimatedSpeedMBps = 80.0; // Optimized HDD speed
-                break;
-            default:
-                estimatedSpeedMBps = 30.0; // Conservative estimate
+        // Ultra-fast methods have special handling
+        if (method == OptimizedSecureWipeEngine.OptimizedWipeMethod.ULTRA_FAST_FORMAT) {
+            // Format is instant + zero fill at max speed
+            double formatTimeSec = 10; // Format takes ~10 seconds
+            estimatedSpeedMBps = 100.0; // Very fast zero fill
+            double fillTimeSec = (sizeGB * 1024) / estimatedSpeedMBps;
+            double totalTimeMins = (formatTimeSec + fillTimeSec) / 60;
+            
+            if (totalTimeMins < 1) return "<1 min";
+            return String.format("~%d min", (int) Math.ceil(totalTimeMins));
+        }
+        
+        if (method == OptimizedSecureWipeEngine.OptimizedWipeMethod.QUICK_SECURE_WIPE) {
+            estimatedSpeedMBps = 80.0; // Fast single-pass with large buffers
+        } else {
+            // Estimate speed based on drive type
+            switch (driveInfo.getType()) {
+                case USB_REMOVABLE:
+                    estimatedSpeedMBps = 60.0; // Optimized USB speed
+                    break;
+                case SSD:
+                    estimatedSpeedMBps = 150.0; // High-performance SSD
+                    break;
+                case HARD_DISK:
+                    estimatedSpeedMBps = 100.0; // Optimized HDD speed
+                    break;
+                default:
+                    estimatedSpeedMBps = 40.0; // Conservative estimate
+            }
         }
         
         // Apply method multiplier
