@@ -64,7 +64,7 @@ public class CertificateGenerator {
         // Constructors, getters, and setters
         public WipeCertificate() {}
         
-        public WipeCertificate(SecureWipeEngine.WipeResult wipeResult, 
+        public WipeCertificate(OptimizedSecureWipeEngine.OptimizedWipeResult wipeResult, 
                               DriveDetector.DriveInfo driveInfo) {
             this.devicePath = wipeResult.getDevicePath();
             this.deviceSerial = wipeResult.getDeviceSerial();
@@ -138,7 +138,7 @@ public class CertificateGenerator {
     /**
      * Generates a digitally signed certificate for the wipe operation
      */
-    public WipeCertificate generateCertificate(SecureWipeEngine.WipeResult wipeResult,
+    public WipeCertificate generateCertificate(OptimizedSecureWipeEngine.OptimizedWipeResult wipeResult,
                                              DriveDetector.DriveInfo driveInfo) throws Exception {
         
         logger.info("Generating certificate for wipe operation: {}", wipeResult.getDevicePath());
